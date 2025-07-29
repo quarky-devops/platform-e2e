@@ -41,7 +41,12 @@ pipelines:
             - cdk deploy QuarkfinCdnStack --require-approval never
             - export CDN_DOMAIN=$(aws cloudformation describe-stacks --stack-name QuarkfinCdnStack --query 'Stacks[0].Outputs[?OutputKey==`DistributionDomainName`].OutputValue' --output text)
             - export ALB_DNS=$(aws cloudformation describe-stacks --stack-name QuarkfinAppStack --query 'Stacks[0].Outputs[?OutputKey==`LoadBalancerDNS`].OutputValue' --output text)
+            - export USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name QuarkfinAuthStack --query 'Stacks[0].Outputs[?OutputKey==`UserPoolId`].OutputValue' --output text)
+            - export CLIENT_ID=$(aws cloudformation describe-stacks --stack-name QuarkfinAuthStack --query 'Stacks[0].Outputs[?OutputKey==`UserPoolClientId`].OutputValue' --output text)
             - cd ../frontend
+            - export NEXT_PUBLIC_AWS_REGION=$AWS_DEFAULT_REGION
+            - export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$USER_POOL_ID
+            - export NEXT_PUBLIC_COGNITO_CLIENT_ID=$CLIENT_ID
             - npm install
             - npm run build
             - cd ../go_backend
