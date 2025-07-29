@@ -1,9 +1,25 @@
+// AWS Cognito Auth Provider - Complete AWS Integration
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session } from '@supabase/supabase-js'
-import { auth, supabase } from '../lib/supabase'
+import { auth, cognitoConfig } from '../lib/supabase'
 import type { UserProfile, SubscriptionPlan, UserCredits } from '../lib/types'
+
+// AWS Cognito Types
+interface User {
+  id: string
+  email?: string
+  email_verified?: boolean
+  phone_number?: string
+  user_metadata?: { [key: string]: any }
+}
+
+interface Session {
+  access_token: string
+  id_token: string
+  refresh_token: string
+  user: User
+}
 
 interface AuthContextType {
   user: User | null
@@ -28,20 +44,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Get API URL based on environment
+  // Get API URL for backend communication
   const getApiUrl = () => {
     if (process.env.NODE_ENV === 'development') {
-      return process.env.NEXT_PUBLIC_API_URL?.includes('localhost') 
-        ? process.env.NEXT_PUBLIC_API_URL 
-        : 'http://localhost:8082'  // Use port 8082 for local backend
+      return 'http://localhost:8080'
     }
-    return process.env.NEXT_PUBLIC_API_URL || 'https://platform-e2e.onrender.com'
+    return '/api'
   }
 
-  // Fetch user profile from backend
+  // Fetch user profile from AWS backend
   const fetchUserProfile = async (currentSession: Session) => {
     try {
-      const response = await fetch(`${getApiUrl()}/api/auth/profile`, {
+      const response = await fetch(`${getApiUrl()}/auth/profile`, {
         headers: {
           'Authorization': `Bearer ${currentSession.access_token}`,
           'Content-Type': 'application/json'
@@ -51,31 +65,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const profile = await response.json()
         setUserProfile(profile)
-        console.log('✅ User profile loaded:', profile.email)
+        console.log('✅ AWS: User profile loaded:', profile.email)
       } else if (response.status === 404) {
-        // User exists in Supabase but not in our backend - needs setup
-        if (process.env.NODE_ENV === 'development') {
-          console.log('ℹ️ User profile not found in backend, needs setup')
-        }
+        console.log('ℹ️ AWS: User profile not found, needs setup')
         setUserProfile(null)
       } else {
-        console.error('Failed to fetch user profile:', response.status)
+        console.error('AWS: Failed to fetch user profile:', response.status)
         setUserProfile(null)
       }
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching user profile:', error)
-      }
+      console.error('AWS: Error fetching user profile:', error)
       setUserProfile(null)
     }
   }
 
-  // Setup new user in backend
+  // Setup new user in AWS backend
   const setupUserInBackend = async (userId: string, email: string, phone: string, fullName: string, currentSession: Session) => {
     try {
-      const response = await fetch(`${getApiUrl()}/api/auth/users`, {
+      const response = await fetch(`${getApiUrl()}/auth/users`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${currentSession.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -87,109 +97,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (response.ok) {
-        console.log('✅ User setup in backend successful')
+        console.log('✅ AWS: User setup in backend successful')
         await fetchUserProfile(currentSession)
         return { success: true }
       } else {
         const errorData = await response.json()
-        console.error('Failed to setup user in backend:', errorData)
+        console.error('AWS: Failed to setup user in backend:', errorData)
         return { success: false, error: errorData.error || 'Failed to setup user account' }
       }
     } catch (error) {
-      console.error('Error setting up user in backend:', error)
+      console.error('AWS: Error setting up user in backend:', error)
       return { success: false, error: 'Network error during account setup' }
     }
   }
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
+    // Initialize AWS Cognito session
+    const initializeAuth = async () => {
       try {
-        const session = await auth.getSession()
-        setSession(session)
-        setUser(session?.user ?? null)
-        
-        // Fetch user profile if session exists
-        if (session) {
-          await fetchUserProfile(session)
+        // Check if Cognito is configured
+        if (!cognitoConfig.userPoolId || !cognitoConfig.userPoolWebClientId) {
+          console.warn('⚠️ AWS Cognito not configured. Using development mode.')
+          setLoading(false)
+          return
+        }
+
+        // Try to get existing session
+        const existingSession = await auth.getSession()
+        if (existingSession) {
+          setSession(existingSession as Session)
+          setUser(existingSession.user)
+          await fetchUserProfile(existingSession as Session)
         }
       } catch (error) {
-        console.error('Error getting initial session:', error)
+        console.error('AWS: Error initializing auth:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    getInitialSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email)
-        setSession(session)
-        setUser(session?.user ?? null)
-        
-        if (session && session.user) {
-          // For any sign-in, check if user exists in backend
-          console.log('🔍 User sign-in detected, checking backend profile...')
-          
-          try {
-            const response = await fetch(`${getApiUrl()}/api/auth/profile`, {
-              headers: {
-                'Authorization': `Bearer ${session.access_token}`,
-                'Content-Type': 'application/json'
-              }
-            })
-            
-            if (response.ok) {
-              // User exists, fetch profile
-              const profile = await response.json()
-              setUserProfile(profile)
-              console.log('✅ User profile loaded:', profile.email)
-            } else if (response.status === 404) {
-              // User doesn't exist in backend, create them
-              console.log('🔧 User not found in backend, creating profile...')
-              const setupResult = await setupUserInBackend(
-                session.user.id,
-                session.user.email!,
-                '', // Empty phone, will be NULL in database
-                session.user.user_metadata?.full_name || 
-                session.user.user_metadata?.name || 
-                session.user.email?.split('@')[0] || 'User',
-                session
-              )
-              
-              if (setupResult.success) {
-                console.log('✅ User profile created successfully')
-              } else {
-                console.error('❌ Failed to create user profile:', setupResult.error)
-                setUserProfile(null)
-              }
-            } else {
-              console.error('Failed to fetch user profile:', response.status)
-              setUserProfile(null)
-            }
-          } catch (error) {
-            console.error('Error during user profile setup:', error)
-            setUserProfile(null)
-          }
-        } else {
-          setUserProfile(null)
-        }
-        
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
+    initializeAuth()
   }, [])
 
   const signIn = async (email: string, password: string) => {
     setLoading(true)
     try {
       const result = await auth.signIn(email, password)
+      
+      if (result.session) {
+        setSession(result.session)
+        setUser(result.user)
+        await fetchUserProfile(result.session)
+      }
+      
       return result
     } catch (error) {
+      console.error('AWS: Sign in error:', error)
       throw error
     } finally {
       setLoading(false)
@@ -199,25 +162,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, phone: string, fullName: string) => {
     setLoading(true)
     try {
-      // Sign up with Supabase - auth.signUp returns AuthResponse with data property
-      const response = await auth.signUp(email, password, {
+      const result = await auth.signUp(email, password, {
         full_name: fullName,
         phone: phone
       })
       
-      // The response has session and user directly (not under data)
-      if (response.session && response.user) {
-        await setupUserInBackend(
-          response.user.id, 
-          email, 
-          phone, 
-          fullName, 
-          response.session
-        )
-      }
-      
-      return response
+      // AWS Cognito signup requires email confirmation
+      console.log('✅ AWS: Signup successful, email confirmation required')
+      return result
     } catch (error) {
+      console.error('AWS: Sign up error:', error)
       throw error
     } finally {
       setLoading(false)
@@ -230,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await auth.signInWithGoogle()
       return result
     } catch (error) {
+      console.error('AWS: Google sign in error:', error)
       throw error
     } finally {
       setLoading(false)
@@ -240,9 +195,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     try {
       await auth.signOut()
+      setUser(null)
+      setSession(null)
       setUserProfile(null)
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('AWS: Sign out error:', error)
     } finally {
       setLoading(false)
     }
@@ -252,6 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await auth.resetPassword(email)
     } catch (error) {
+      console.error('AWS: Reset password error:', error)
       throw error
     }
   }
@@ -268,7 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: 'Not authenticated' }
       }
 
-      const response = await fetch(`${getApiUrl()}/api/auth/profile`, {
+      const response = await fetch(`${getApiUrl()}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -285,6 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: errorData.error || 'Failed to update profile' }
       }
     } catch (error) {
+      console.error('AWS: Update profile error:', error)
       return { error: 'An unexpected error occurred' }
     }
   }
@@ -295,10 +254,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: 'Not authenticated' }
       }
 
-      // First try to create the user profile
       const result = await setupUserInBackend(user.id, user.email!, phone, fullName, session)
       return result.error ? { error: result.error } : {}
     } catch (error) {
+      console.error('AWS: Setup new user error:', error)
       return { error: 'An unexpected error occurred' }
     }
   }

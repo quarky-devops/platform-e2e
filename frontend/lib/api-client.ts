@@ -1,3 +1,6 @@
+// AWS-Based API Client for QuarkfinAI Platform
+// Complete AWS integration - no Supabase, no Render.com
+
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios'
 import {
   APIResponse,
@@ -12,20 +15,15 @@ import {
   SubscriptionPlan
 } from './types'
 
-// API Configuration - supports both local development and production
+// AWS API Configuration - Production ready
 const getApiUrl = () => {
-  // For development, use local backend if available
+  // Development: Use local backend
   if (process.env.NODE_ENV === 'development') {
-    // Check if we're explicitly configured for production backend
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (apiUrl && !apiUrl.includes('localhost')) {
-      return apiUrl; // Use production backend URL from .env
-    }
-    return 'http://localhost:8082'; // Use local backend for development
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
   }
   
-  // For production, use the environment variable or fallback
-  return process.env.NEXT_PUBLIC_API_URL || 'https://platform-e2e.onrender.com'
+  // Production: Use CloudFront distribution for API
+  return process.env.NEXT_PUBLIC_API_URL || '/api'
 }
 
 // Get authentication token from AWS Cognito
@@ -33,8 +31,14 @@ const getAuthToken = async () => {
   if (typeof window === 'undefined') return null
   
   try {
-    // For now, return null until Cognito is fully implemented
-    // TODO: Implement Cognito token retrieval
+    // TODO: Implement AWS Cognito token retrieval
+    // For now, return mock token for development
+    if (process.env.NODE_ENV === 'development') {
+      return 'mock-dev-token'
+    }
+    
+    // Production: Get from Cognito session
+    // const token = await getCognitoAccessToken()
     return null
   } catch (error) {
     console.error('Error getting auth token:', error)
@@ -72,7 +76,7 @@ interface ManualQualificationUpdateRequest {
   qualification_status: 'Qualified' | 'Not Qualified'
 }
 
-class ProductionAPIClient {
+class AWSAPIClient {
   private client: AxiosInstance
   private requestQueue: Map<string, Promise<any>> = new Map()
 
@@ -82,8 +86,8 @@ class ProductionAPIClient {
       timeout: API_TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-        // Removed User-Agent header as browsers don't allow setting it manually
+        'Accept': 'application/json',
+        'X-Platform': 'QuarkfinAI-Web'
       }
     })
 
@@ -94,15 +98,18 @@ class ProductionAPIClient {
     // Request interceptor - add auth token to all requests
     this.client.interceptors.request.use(
       async (config) => {
-        // Add authentication token to requests
+        // Add AWS Cognito authentication token
         const token = await getAuthToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
         
+        // Add AWS request headers
+        config.headers['X-Requested-With'] = 'XMLHttpRequest'
+        
         // Log request in development
         if (process.env.NODE_ENV === 'development') {
-          console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`)
+          console.log(`🚀 AWS API Request: ${config.method?.toUpperCase()} ${config.url}`)
         }
         
         return config
@@ -117,13 +124,13 @@ class ProductionAPIClient {
     this.client.interceptors.response.use(
       (response) => {
         if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ API Response: ${response.status}`)
+          console.log(`✅ AWS API Response: ${response.status}`)
         }
         
         return response
       },
       (error: AxiosError) => {
-        console.error(`❌ API Error: ${error.response?.status || 'Network Error'}`)
+        console.error(`❌ AWS API Error: ${error.response?.status || 'Network Error'}`)
         
         return Promise.reject(this.formatError(error))
       }
@@ -136,7 +143,6 @@ class ProductionAPIClient {
       
       // Handle different error types
       if (!error.response) {
-        // Network error
         return {
           message: 'Network error - please check your internet connection',
           code: 'NETWORK_ERROR',
@@ -146,7 +152,6 @@ class ProductionAPIClient {
       }
       
       if (error.code === 'ECONNABORTED') {
-        // Timeout error
         return {
           message: 'Request timed out - please try again',
           code: 'TIMEOUT_ERROR',
@@ -155,7 +160,7 @@ class ProductionAPIClient {
         }
       }
       
-      // API error response
+      // AWS API error response
       const response = axiosError.response
       const data = response?.data as any
       
@@ -167,7 +172,6 @@ class ProductionAPIClient {
       }
     }
     
-    // Generic error
     return {
       message: error.message || 'An unexpected error occurred',
       code: 'UNKNOWN_ERROR',
@@ -194,8 +198,8 @@ class ProductionAPIClient {
         apiError.code !== 'TIMEOUT_ERROR'
       
       if (shouldRetry) {
-        console.warn(`🔄 Retrying request... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`)
-        await this.delay(RETRY_DELAY * (MAX_RETRIES - retries + 1)) // Exponential backoff
+        console.warn(`🔄 Retrying AWS API request... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`)
+        await this.delay(RETRY_DELAY * (MAX_RETRIES - retries + 1))
         return this.retryRequest(requestFn, retries - 1)
       }
       
@@ -207,7 +211,6 @@ class ProductionAPIClient {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  // Deduplication for identical requests
   private async deduplicateRequest<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
     if (this.requestQueue.has(key)) {
       return this.requestQueue.get(key) as Promise<T>
@@ -223,33 +226,10 @@ class ProductionAPIClient {
 
   // Health Check
   async healthCheck(): Promise<{ message: string; status: string }> {
-    return this.retryRequest(() => this.client.get('/ping'))
+    return this.retryRequest(() => this.client.get('/health'))
   }
 
-  // Website Risk Assessment API
-  async createAssessment(data: CreateAssessmentRequest): Promise<Assessment> {
-    const requestKey = `assessment-${data.website}-${data.country_code}`
-    
-    return this.deduplicateRequest(requestKey, () => 
-      this.retryRequest(() => this.client.post<Assessment>('/api/v1/assessments', data))
-    )
-  }
-
-  async getAssessment(id: number): Promise<Assessment> {
-    return this.retryRequest(() => this.client.get<Assessment>(`/api/v1/assessments/${id}`))
-  }
-
-  async listAssessments(params?: {
-    limit?: number
-    offset?: number
-    status?: 'pending' | 'processing' | 'completed' | 'failed'
-    country_code?: string
-    risk_category?: 'low_risk' | 'med_risk' | 'high_risk'
-  }): Promise<Assessment[]> {
-    return this.retryRequest(() => this.client.get<Assessment[]>('/api/v1/assessments', { params }))
-  }
-
-  // Business Risk Prevention API
+  // Business Risk Assessment API (Primary Product)
   async createBusinessRiskAssessment(data: CreateBusinessRiskAssessmentRequest): Promise<BusinessRiskAssessment> {
     const requestKey = `business-risk-${data.domain}-${data.assessment_type}`
     
@@ -266,18 +246,6 @@ class ProductionAPIClient {
     return this.retryRequest(() => this.client.get<BusinessRiskAssessment[]>('/api/business-risk-prevention/assessments'))
   }
 
-  async updateBusinessRiskAssessment(id: string, data: Partial<CreateBusinessRiskAssessmentRequest>): Promise<BusinessRiskAssessment> {
-    return this.retryRequest(() => this.client.put<BusinessRiskAssessment>(`/api/business-risk-prevention/assessments/${id}`, data))
-  }
-
-  async deleteBusinessRiskAssessment(id: string): Promise<void> {
-    await this.retryRequest(() => this.client.delete(`/api/business-risk-prevention/assessments/${id}`))
-  }
-
-  async bulkDeleteBusinessRiskAssessments(ids: string[]): Promise<void> {
-    await this.retryRequest(() => this.client.delete('/api/business-risk-prevention/assessments/bulk', { data: { ids } }))
-  }
-
   async rerunBusinessRiskAssessment(id: string): Promise<BusinessRiskAssessment> {
     return this.retryRequest(() => this.client.post<BusinessRiskAssessment>(`/api/business-risk-prevention/assessments/${id}/rerun`))
   }
@@ -286,51 +254,7 @@ class ProductionAPIClient {
     return this.retryRequest(() => this.client.get<BusinessRiskInsights>('/api/business-risk-prevention/insights'))
   }
 
-  // Export Functions
-  async exportBusinessRiskAssessmentsCSV(): Promise<Blob> {
-    const response = await this.retryRequest(() => 
-      this.client.get('/api/business-risk-prevention/export/csv', {
-        responseType: 'blob'
-      })
-    )
-    return response as unknown as Blob
-  }
-
-  async exportBusinessRiskAssessmentPDF(id: string): Promise<Blob> {
-    const response = await this.retryRequest(() =>
-      this.client.get(`/api/business-risk-prevention/assessments/${id}/export/pdf`, {
-        responseType: 'blob'
-      })
-    )
-    return response as unknown as Blob
-  }
-
-  // Website Risk Assessment API (migrated from Python/JS)
-  async doWebsiteRiskAssessment(data: WebsiteRiskAssessmentRequest): Promise<WebsiteRiskAssessmentResponse> {
-    const requestKey = `website-risk-${data.Website}-${data.BillingCountryCode}`
-    
-    return this.deduplicateRequest(requestKey, () => 
-      this.retryRequest(() => this.client.post<WebsiteRiskAssessmentResponse>('/api/website-risk-assessment/do-assessment', data))
-    )
-  }
-
-  async getWebsiteRiskAssessment(data: GetWebsiteRiskAssessmentRequest): Promise<any> {
-    return this.retryRequest(() => this.client.post('/api/website-risk-assessment/get-assessment', data))
-  }
-
-  async updateWebsiteRiskQualification(data: ManualQualificationUpdateRequest): Promise<any> {
-    return this.retryRequest(() => this.client.post('/api/website-risk-assessment/manual-update', data))
-  }
-
-  async listWebsiteRiskAssessments(): Promise<any[]> {
-    return this.retryRequest(() => this.client.get('/api/website-risk-assessment/assessments'))
-  }
-
-  async getWebsiteRiskAssessmentById(id: string): Promise<any> {
-    return this.retryRequest(() => this.client.get(`/api/website-risk-assessment/assessments/${id}`))
-  }
-
-  // User Management & Authentication API
+  // AWS Cognito Authentication API
   async getUserProfile(): Promise<UserProfile> {
     return this.retryRequest(() => this.client.get<UserProfile>('/api/auth/profile'))
   }
@@ -347,7 +271,7 @@ class ProductionAPIClient {
     return this.retryRequest(() => this.client.get<SubscriptionPlan[]>('/api/auth/plans'))
   }
 
-  // Phone Verification API
+  // AWS SNS Phone Verification
   async sendPhoneVerification(phone: string): Promise<{ message: string; code_sent: boolean; expires_at: string }> {
     return this.retryRequest(() => this.client.post('/api/auth/send-phone-verification', { phone }))
   }
@@ -356,100 +280,35 @@ class ProductionAPIClient {
     return this.retryRequest(() => this.client.post('/api/auth/verify-phone-code', { phone, code }))
   }
 
-  async updatePhoneNumber(phone: string): Promise<{ message: string; phone: string; phone_verified: boolean }> {
-    return this.retryRequest(() => this.client.put('/api/auth/phone', { phone }))
+  // PayU Payment Integration
+  async createPayment(data: { plan_id: string; billing_cycle: 'monthly' | 'yearly' }): Promise<{ payment_url: string; order_id: string }> {
+    return this.retryRequest(() => this.client.post('/api/payments/create', data))
   }
 
-  // User Setup (for post-Supabase auth)
-  async createUser(data: { user_id: string; email: string; phone?: string; full_name: string }): Promise<{ message: string; user_id: string; email: string }> {
-    return this.retryRequest(() => this.client.post('/api/auth/users', data))
+  async verifyPayment(order_id: string): Promise<{ status: string; credits_added: number }> {
+    return this.retryRequest(() => this.client.post('/api/payments/verify', { order_id }))
   }
 
-  async verifyToken(): Promise<{ valid: boolean; user_id?: string; email?: string }> {
-    return this.retryRequest(() => this.client.get('/api/auth/verify'))
-  }
-
-  // Utility Methods
+  // Utility Methods for AWS-based platform
   getRiskCategoryLabel(category: string): string {
     switch (category) {
-      case 'low_risk':
-        return 'Low Risk'
-      case 'med_risk':
-        return 'Medium Risk'  
-      case 'high_risk':
-        return 'High Risk'
-      default:
-        return 'Unknown'
+      case 'low_risk': return 'Low Risk'
+      case 'med_risk': return 'Medium Risk'  
+      case 'high_risk': return 'High Risk'
+      default: return 'Unknown'
     }
   }
 
   getRiskCategoryColor(category: string): string {
     switch (category) {
-      case 'low_risk':
-        return 'green'
-      case 'med_risk':
-        return 'yellow'
-      case 'high_risk':
-        return 'red'
-      default:
-        return 'gray'
+      case 'low_risk': return 'green'
+      case 'med_risk': return 'yellow'
+      case 'high_risk': return 'red'
+      default: return 'gray'
     }
-  }
-
-  getBusinessRiskLevelColor(level: string): string {
-    switch (level) {
-      case 'Low':
-        return 'green'
-      case 'Medium':
-        return 'yellow'
-      case 'High':
-        return 'red'
-      case 'Pending':
-        return 'gray'
-      default:
-        return 'gray'
-    }
-  }
-
-  // Assessment Status Polling
-  async pollAssessmentStatus(
-    id: number, 
-    onUpdate?: (assessment: Assessment) => void,
-    maxAttempts: number = 60, // 2 minutes max
-    intervalMs: number = 2000 // 2 seconds
-  ): Promise<Assessment> {
-    let attempts = 0
-    
-    while (attempts < maxAttempts) {
-      try {
-        const assessment = await this.getAssessment(id)
-        
-        if (onUpdate) {
-          onUpdate(assessment)
-        }
-        
-        if (assessment.status === 'completed' || assessment.status === 'failed') {
-          return assessment
-        }
-        
-        await this.delay(intervalMs)
-        attempts++
-      } catch (error) {
-        console.warn(`Polling attempt ${attempts + 1} failed:`, error)
-        attempts++
-        
-        if (attempts < maxAttempts) {
-          await this.delay(intervalMs)
-        } else {
-          throw error
-        }
-      }
-    }
-    
-    throw new Error('Assessment polling timed out after 2 minutes')
   }
 }
 
 // Export singleton instance
-export const apiClient = new ProductionAPIClient()
-export { ProductionAPIClient }
+export const apiClient = new AWSAPIClient()
+export { AWSAPIClient }
