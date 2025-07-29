@@ -1,135 +1,174 @@
-# Go Backend
-*.exe
-*.test
-*.out
-/vendor/
-go_backend/vendor/
-go_backend/risk_assessment_server
-go_backend/backend
-go_backend/quarkfin-backend
+# QuarkfinAI Production .gitignore - Comprehensive
+# Ignores all unnecessary files for clean Bitbucket deployment
 
-# Node.js & Next.js Frontend
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/build/
-frontend/.vercel
-frontend/*.tsbuildinfo
-frontend/next-env.d.ts
-frontend/dist/
-
-# CDK Infrastructure - Build Files & Secrets
-infrastructure/node_modules/
-infrastructure/cdk.out/
-infrastructure/cdk.context.json
-infrastructure/tsc
-infrastructure/lib/*.js
-infrastructure/lib/*.d.ts
-infrastructure/bin/*.js
-infrastructure/bin/*.d.ts
-infrastructure/tsconfig.tsbuildinfo
-infrastructure/*.log
-infrastructure/temp/
-infrastructure/quarkfin-infrastructure@*
-
-# Dependencies
+# ================================
+# NODE.JS & NPM
+# ================================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnp
-.pnp.js
+.pnpm-debug.log*
+package-lock.json.backup
+yarn.lock.backup
 
-# Testing
-coverage/
-.nyc_output
-frontend/playwright-report/
-frontend/test-results/
+# ================================
+# NEXT.JS FRONTEND
+# ================================
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
 
-# IDE files
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Environment files with secrets
-.env
-.env.*
-!.env.example
-config.yaml
+# ================================
+# GO BACKEND
+# ================================
+go_backend/quarkfin-backend
+go_backend/backend
+go_backend/risk_assessment_server
+go_backend/*.exe
+go_backend/*.test
+go_backend/*.out
+go_backend/vendor/
 go_backend/.env
-frontend/.env
 
-# AWS Infrastructure - Sensitive Files
-aws-production/.terraform/
-aws-production/terraform.tfstate*
-aws-production/terraform.tfvars
-aws-production/quarkfin-key*
-aws-production/.terraform.lock.hcl
-
-# CDK Infrastructure - Build Files & Secrets
-infrastructure/node_modules/
+# ================================
+# CDK INFRASTRUCTURE
+# ================================
 infrastructure/cdk.out/
 infrastructure/cdk.context.json
-infrastructure/tsc
 infrastructure/lib/*.js
 infrastructure/lib/*.d.ts
 infrastructure/bin/*.js
 infrastructure/bin/*.d.ts
 infrastructure/tsconfig.tsbuildinfo
+infrastructure/quarkfin-infrastructure@*
+infrastructure/tsc
+infrastructure/.env
 
-# CDK local files (but keep package.json & package-lock.json)
-infrastructure/*.log
-infrastructure/temp/
-
-# Cleanup folder
-to_be_deleted/
-fresh_cleanup/
-
-# Large binary files and build artifacts
+# ================================
+# BUILD ARTIFACTS
+# ================================
 *.tar.gz
 *.zip
-*.deb
-*.rpm
+*.rar
+*.7z
 *.dmg
 *.iso
 *.img
 *.bin
-*.so
+*.exe
 *.dll
+*.so
 *.dylib
+*.deb
+*.rpm
+deployment-package.tar.gz
 
-# Package files that shouldn't be committed
-package-lock.json.backup
-yarn.lock.backup
-*.tgz
-
-# CDK build artifacts that are large
-cdk.out/
-*.js.map
-*.d.ts.map
-
-# Temporary files that can be large
-temp_removed/
-*.bak
-*.removed
-*.log
-dist/
-build/
-out/
-
-# Database and data files
+# ================================
+# DATABASES & DATA
+# ================================
 *.db
 *.sqlite
 *.sqlite3
 *.db-journal
 
-# Media files (if any got added accidentally)
+# ================================
+# LOGS & TEMPORARY FILES
+# ================================
+*.log
+logs/
+temp/
+tmp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.cache/
+.parcel-cache/
+
+# ================================
+# OS FILES
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.lnk
+
+# ================================
+# IDE & EDITOR FILES
+# ================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# ================================
+# ENVIRONMENT & SECRETS
+# ================================
+.env
+.env.*
+!.env.example
+config.yaml
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ================================
+# AWS & TERRAFORM (OLD)
+# ================================
+aws-production/
+.terraform/
+terraform.tfstate*
+terraform.tfvars
+*.tfplan
+
+# ================================
+# TEST & COVERAGE
+# ================================
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+*.lcov
+
+# ================================
+# CLEANUP SCRIPTS & TEMPORARY
+# ================================
+*cleanup*
+*-cleanup.sh
+nuclear-cleanup.sh
+ultimate-cleanup.sh
+fresh-repo.sh
+force-clean.sh
+add-all-files.sh
+complete-push.sh
+final-push.sh
+emergency-recovery.sh
+final-clean-push.sh
+clean-slate.sh
+to_be_deleted/
+fresh_cleanup/
+temp_removed/
+
+# ================================
+# LARGE MEDIA FILES
+# ================================
 *.mp4
 *.avi
 *.mov
@@ -139,34 +178,25 @@ out/
 *.wav
 *.flac
 *.aac
+*.ogg
 
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
+# ================================
+# BACKUP FILES
+# ================================
+*.backup
+*.old
+*.orig
+*.rej
+*~
 
-# Misc
-.cache/
-.parcel-cache/
-.turbo/
-
-# IMPORTANT: Don't ignore deployment files
-!build.sh
-!start.sh
-!frontend/package-lock.json
-!package-lock.json
-
-# Ensure these are always ignored
-**/node_modules/
-**/cdk.out/
-**/.next/
-**/dist/
-**/build/
-**/*.exe
-**/*.bin
-**/*.so
-**/*.dylib
-**/*.tar.gz
-**/*.zip
+# ================================
+# KEEP THESE IMPORTANT FILES
+# ================================
+# !package.json
+# !package-lock.json
+# !go.mod
+# !go.sum
+# !cdk.json
+# !tsconfig.json
+# !bitbucket-pipelines.yml
+# !README.md
