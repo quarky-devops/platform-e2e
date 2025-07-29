@@ -1,0 +1,3 @@
+      engine: rds.DatabaseInstanceEngine.postgres({
+        version: rds.PostgresEngineVersion.VER_14_9, // Most stable version
+      }),

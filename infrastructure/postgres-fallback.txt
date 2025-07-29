@@ -1,0 +1,10 @@
+// Alternative database configuration - use if VER_14_9 fails
+// Replace the engine section in database-stack.ts with this:
+
+engine: rds.DatabaseInstanceEngine.postgres({
+  version: rds.PostgresEngineVersion.VER_13_13, // Widely supported stable version
+}),
+
+// OR if that fails, use default latest:
+
+engine: rds.DatabaseInstanceEngine.POSTGRES, // Uses default latest version
