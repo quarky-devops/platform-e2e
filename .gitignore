@@ -1,0 +1,172 @@
+# Go Backend
+*.exe
+*.test
+*.out
+/vendor/
+go_backend/vendor/
+go_backend/risk_assessment_server
+go_backend/backend
+go_backend/quarkfin-backend
+
+# Node.js & Next.js Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/dist/
+
+# CDK Infrastructure - Build Files & Secrets
+infrastructure/node_modules/
+infrastructure/cdk.out/
+infrastructure/cdk.context.json
+infrastructure/tsc
+infrastructure/lib/*.js
+infrastructure/lib/*.d.ts
+infrastructure/bin/*.js
+infrastructure/bin/*.d.ts
+infrastructure/tsconfig.tsbuildinfo
+infrastructure/*.log
+infrastructure/temp/
+infrastructure/quarkfin-infrastructure@*
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output
+frontend/playwright-report/
+frontend/test-results/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+config.yaml
+go_backend/.env
+frontend/.env
+
+# AWS Infrastructure - Sensitive Files
+aws-production/.terraform/
+aws-production/terraform.tfstate*
+aws-production/terraform.tfvars
+aws-production/quarkfin-key*
+aws-production/.terraform.lock.hcl
+
+# CDK Infrastructure - Build Files & Secrets
+infrastructure/node_modules/
+infrastructure/cdk.out/
+infrastructure/cdk.context.json
+infrastructure/tsc
+infrastructure/lib/*.js
+infrastructure/lib/*.d.ts
+infrastructure/bin/*.js
+infrastructure/bin/*.d.ts
+infrastructure/tsconfig.tsbuildinfo
+
+# CDK local files (but keep package.json & package-lock.json)
+infrastructure/*.log
+infrastructure/temp/
+
+# Cleanup folder
+to_be_deleted/
+fresh_cleanup/
+
+# Large binary files and build artifacts
+*.tar.gz
+*.zip
+*.deb
+*.rpm
+*.dmg
+*.iso
+*.img
+*.bin
+*.so
+*.dll
+*.dylib
+
+# Package files that shouldn't be committed
+package-lock.json.backup
+yarn.lock.backup
+*.tgz
+
+# CDK build artifacts that are large
+cdk.out/
+*.js.map
+*.d.ts.map
+
+# Temporary files that can be large
+temp_removed/
+*.bak
+*.removed
+*.log
+dist/
+build/
+out/
+
+# Database and data files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Media files (if any got added accidentally)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.mp3
+*.wav
+*.flac
+*.aac
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Misc
+.cache/
+.parcel-cache/
+.turbo/
+
+# IMPORTANT: Don't ignore deployment files
+!build.sh
+!start.sh
+!frontend/package-lock.json
+!package-lock.json
+
+# Ensure these are always ignored
+**/node_modules/
+**/cdk.out/
+**/.next/
+**/dist/
+**/build/
+**/*.exe
+**/*.bin
+**/*.so
+**/*.dylib
+**/*.tar.gz
+**/*.zip

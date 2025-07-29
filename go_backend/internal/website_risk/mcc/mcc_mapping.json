@@ -1,0 +1,442 @@
+{
+    "categories": [
+      {
+        "category": "Adult",
+        "subcategories": [
+          {
+            "name": "Adult goods (excluding fetish products)",
+            "mcc": "5999"
+          },
+          {
+            "name": "Fetish products",
+            "mcc": "5999"
+          },
+          {
+            "name": "Content: Books, magazines, audio, videos, websites, streaming services and other content formats deemed offensive or of a sexual nature",
+            "mcc": "7841"
+          },
+          {
+            "name": "Entertainment: Gentleman's clubs, topless bars, strip clubs, sexually oriented massage parlors, saunas, escort agencies or any sexually-related services",
+            "mcc": "7297"
+          }
+        ]
+      },
+      {
+        "category": "Financial Businesses",
+        "subcategories": [
+          {
+            "name": "Bearer share entities",
+            "mcc": "6211"
+          },
+          {
+            "name": "Binary options",
+            "mcc": "6211"
+          },
+          {
+            "name": "Buy now pay later / Installment payment methods",
+            "mcc": "6012"
+          },
+          {
+            "name": "Credit repair and credit protection business",
+            "mcc": "7276"
+          },
+          {
+            "name": "Debt repayment and collection agency",
+            "mcc": "7322"
+          },
+          {
+            "name": "E-wallet or e-money that can be monetized, re-sold or converted to physical and digital goods and services or otherwise exit the virtual world",
+            "mcc": "6051"
+          },
+          {
+            "name": "Financial service or money service business, including but not limited to: traveler checks, money orders, Foreign Exchange, check cashing, virtual currencies, and cash advances by non-financial institutes",
+            "mcc": "6211"
+          },
+          {
+            "name": "Fines or penalty collections of any kind",
+            "mcc": "9223"
+          },
+          {
+            "name": "Independent or unlicensed financial advisors",
+            "mcc": "6282"
+          },
+          {
+            "name": "Insurance sales and services (life)",
+            "mcc": "6300"
+          },
+          {
+            "name": "Insurance sales and services (non-life)",
+            "mcc": "6300"
+          },
+          {
+            "name": "Money transfer and remittance businesses",
+            "mcc": "4829"
+          },
+          {
+            "name": "Payday loans, unsecured loans and loans originating from non FDIC insured banks",
+            "mcc": "6012"
+          },
+          {
+            "name": "Payroll, invoice and business services",
+            "mcc": "7399"
+          },
+          {
+            "name": "Provider or seller prepaid access/stored value",
+            "mcc": "6051"
+          },
+          {
+            "name": "Shell banks",
+            "mcc": "6211"
+          }
+        ]
+      },
+      {
+        "category": "Intellectual Property (IP)",
+        "subcategories": [
+          {
+            "name": "Counterfeit products, replicas or designed infringements of them including products designed to circumvent IP",
+            "mcc": "5999"
+          },
+          {
+            "name": "Essay mills, paper mills where the intent is to falsely submit documents as their own work",
+            "mcc": "8299"
+          },
+          {
+            "name": "Products designed to circumvent copyright protection techniques or to otherwise facilitate the unlicensed use of copyrighted material",
+            "mcc": "5734"
+          },
+          {
+            "name": "The use of Adyen's logo and IP without express permission or in a way that creates reputation risk for Adyen",
+            "mcc": "8999"
+          }
+        ]
+      },
+      {
+        "category": "Marketing Practices",
+        "subcategories": [
+          {
+            "name": "Business investment opportunities operating as 'get rich quick schemes'",
+            "mcc": "7389"
+          },
+          {
+            "name": "Business models that use ransom or extortion like practices",
+            "mcc": "7399"
+          },
+          {
+            "name": "Business practices that are designed to evade excessive chargeback monitoring programs",
+            "mcc": "8999"
+          },
+          {
+            "name": "Data Pass",
+            "mcc": "4816"
+          },
+          {
+            "name": "Deceptive marketing tactics related to disclosure, false or inaccurate claims, before/after claims, endorsements, cancellation or refunds avoidance, pre-checked opt-ins, poorly disclosed negative options, misappropriation of incentives, disproportionate rebates, sweepstakes",
+            "mcc": "5968"
+          },
+          {
+            "name": "Fake references and other services or products that foster deception",
+            "mcc": "8999"
+          },
+          {
+            "name": "Inbound telemarketing for postcard or mailings",
+            "mcc": "5966"
+          },
+          {
+            "name": "Products or services that promote hate, violence, discrimination, terrorism, harassment or abuse in any shape or form",
+            "mcc": "8398"
+          },
+          {
+            "name": "Pyramid selling, chain letters or other financial scams",
+            "mcc": "7299"
+          }
+        ]
+      },
+      {
+        "category": "Not-for-Profit",
+        "subcategories": [
+          {
+            "name": "Crowdfunding",
+            "mcc": "8399"
+          },
+          {
+            "name": "Non-profit Organizations (NPOs)",
+            "mcc": "8398"
+          }
+        ]
+      },
+      {
+        "category": "Other Products and Services",
+        "subcategories": [
+          {
+            "name": "Airlines",
+            "mcc": "4511"
+          },
+          {
+            "name": "Ancestry research",
+            "mcc": "8999"
+          },
+          {
+            "name": "Animals and wildlife products classified as endangered or protected",
+            "mcc": "5995"
+          },
+          {
+            "name": "Art dealers and galleries",
+            "mcc": "5971"
+          },
+          {
+            "name": "Auction houses",
+            "mcc": "7996"
+          },
+          {
+            "name": "Bail bonds and bankruptcy lawyers",
+            "mcc": "9223"
+          },
+          {
+            "name": "Bidding fee and penny auctions",
+            "mcc": "7996"
+          },
+          {
+            "name": "Casual dating services",
+            "mcc": "7273"
+          },
+          {
+            "name": "Car and truck rental / sales / importers / car parts",
+            "mcc": "7512"
+          },
+          {
+            "name": "Certain social media business (e.g. click farms)",
+            "mcc": "4816"
+          },
+          {
+            "name": "Cloud storage, VPN, file sharing, cyber lockers (except for high-risk)",
+            "mcc": "7372"
+          },
+          {
+            "name": "Cruise Lines",
+            "mcc": "4411"
+          },
+          {
+            "name": "Detective Agencies",
+            "mcc": "7393"
+          },
+          {
+            "name": "Direct Marketing, Inbound teleservices, outbound telemarketing and travel-related arrangement services, Insurance services, catalog merchants, door-to-door sales",
+            "mcc": "5966"
+          },
+          {
+            "name": "Drop shipping",
+            "mcc": "5969"
+          },
+          {
+            "name": "Governmental services, such as embassies or consulates",
+            "mcc": "9399"
+          },
+          {
+            "name": "Hazardous materials (B2B), including but not limited to: Hydrofluoric acid, products containing cyanide, prohibited ozone-depleting substances (ODS), nitric acid, peptides, research chemicals, and bacteria cultures or other products containing E-coli or Escherichia coli",
+            "mcc": "5999"
+          },
+          {
+            "name": "Hazardous materials (B2C), as described above",
+            "mcc": "5999"
+          },
+          {
+            "name": "Health practitioners, private medical practices, e-doctors, dental/medical services and facilities",
+            "mcc": "8011"
+          },
+          {
+            "name": "High value fashion, shoes, bags and accessories",
+            "mcc": "5699"
+          },
+          {
+            "name": "High-risk cyber lockers",
+            "mcc": "7372"
+          },
+          {
+            "name": "Human body parts or bodily fluids (excluding hair and teeth)",
+            "mcc": "5999"
+          },
+          {
+            "name": "Internet product and service providers",
+            "mcc": "7375"
+          },
+          {
+            "name": "Intravenous therapy (e.g. IV drip bar, vitamin infusions, hangover cures)",
+            "mcc": "8099"
+          },
+          {
+            "name": "Jewelry, watch, precious stones, metals and silverware stores",
+            "mcc": "5094"
+          },
+          {
+            "name": "Key-entry telecom merchant",
+            "mcc": "4814"
+          },
+          {
+            "name": "Live-streaming Services without in-app currency",
+            "mcc": "4816"
+          },
+          {
+            "name": "Live-streaming Services with in-app donations functionality",
+            "mcc": "4816"
+          },
+          {
+            "name": "Mail order spouse or international match-making services",
+            "mcc": "7273"
+          },
+          {
+            "name": "Medical, dental, ophthalmic and hospital equipment and supplies",
+            "mcc": "5047"
+          },
+          {
+            "name": "Medical Spas",
+            "mcc": "8099"
+          },
+          {
+            "name": "Nutraceuticals and food products, not including highly regulated products such as CBD and kava kava",
+            "mcc": "5499"
+          },
+          {
+            "name": "Nutraceuticals and food products (highly regulated), including, but not limited to CBD and kava kava related products",
+            "mcc": "5499"
+          },
+          {
+            "name": "Pawn shops",
+            "mcc": "5933"
+          },
+          {
+            "name": "Political, religious or Social Campaigning",
+            "mcc": "8651"
+          },
+          {
+            "name": "Real estate services",
+            "mcc": "6531"
+          },
+          {
+            "name": "Services associated with pseudoscience (e.g. clairvoyance, horoscopes)",
+            "mcc": "7999"
+          },
+          {
+            "name": "Telemarketing companies selling products or services as an agent for a third party",
+            "mcc": "5966"
+          },
+          {
+            "name": "Ticket agencies",
+            "mcc": "7999"
+          },
+          {
+            "name": "Timeshare and timeshare maintenance",
+            "mcc": "7011"
+          },
+          {
+            "name": "Travel agents and tour operators",
+            "mcc": "4722"
+          },
+          {
+            "name": "Veterinary practices",
+            "mcc": "0742"
+          }
+        ]
+      },
+      {
+        "category": "Regulated",
+        "subcategories": [
+          {
+            "name": "Alcohol sales",
+            "mcc": "5921"
+          },
+          {
+            "name": "Cannabis (only in Canada)",
+            "mcc": "5993"
+          },
+          {
+            "name": "Drugs, and tools specifically intended for the production of drugs, drug paraphernalia, illegal drugs, substances designed to mimic illegal drugs and/or other psychoactive products",
+            "mcc": "5912"
+          },
+          {
+            "name": "Illegal products or services or any service providing peripheral support of illegal activities, including illegal gambling services",
+            "mcc": "7995"
+          },
+          {
+            "name": "Legal gambling or Game of Skill where participants receive cash or cash equivalents or prizes with/of material value: including but not limited to: Casinos, poker, bingo, slot machines, betting, lotteries, racing, fantasy sports",
+            "mcc": "7994"
+          },
+          {
+            "name": "Products or services specifically offered or intended to be used to create, produce or grow drugs or drug ingredients",
+            "mcc": "5999"
+          },
+          {
+            "name": "Pharmaceuticals, prescription medicine and medical devices (including animal pharmaceuticals)",
+            "mcc": "5912"
+          },
+          {
+            "name": "Tobacco, smoking supplies, e-cigarettes, e-liquids, vaping liquid, vaping accessories (domestic sale)",
+            "mcc": "5993"
+          },
+          {
+            "name": "Tobacco, smoking supplies, e-cigarettes, e-liquids, vaping liquid, vaping accessories (online sale)",
+            "mcc": "5993"
+          },
+          {
+            "name": "Trade of fireworks, flammable or radioactive materials",
+            "mcc": "5099"
+          },
+          {
+            "name": "Trade of weapons, ammunitions, military arms, explosive devices and firearm parts",
+            "mcc": "5099"
+          },
+          {
+            "name": "Any type of US based gambling services",
+            "mcc": "7995"
+          }
+        ]
+      },
+      {
+        "category": "Securities and Trading",
+        "subcategories": [
+          {
+            "name": "Cryptocurrency exchange",
+            "mcc": "6051"
+          },
+          {
+            "name": "High-risk securities such as: contract for difference (CFD), financial spread betting, initial coin offering (ICO), forex currency options, cryptocurrency options, and trading, and purchases",
+            "mcc": "6211"
+          },
+          {
+            "name": "Security brokers / investments of any kind including the purchase of: securities, currencies, derivatives, commodities, shares, options, precious metals, and other financial instruments",
+            "mcc": "6211"
+          }
+        ]
+      },
+      {
+        "category": "Third Party Payment Processing",
+        "subcategories": [
+          {
+            "name": "Aggregators, including but not limited to marketplaces, platforms",
+            "mcc": "5999"
+          },
+          {
+            "name": "Staged Digital Wallet Operators",
+            "mcc": "6051"
+          },
+          {
+            "name": "Payment Facilitators or other internet payment or member service providers (IPSP or MPS)",
+            "mcc": "6012"
+          },
+          {
+            "name": "Payment service companies, including but not limited to peer-to-peer, bill payments, commissary accounts",
+            "mcc": "6012"
+          }
+        ]
+    },
+    {
+      "category": "Technology",
+      "subcategories": [
+        {
+          "name": "Decryption and descrambler products and services, devices designed to block, jam or interfere with cellular and personal communications",
+          "mcc": "4812"
+        }
+      ]
+    }
+    ]
+}

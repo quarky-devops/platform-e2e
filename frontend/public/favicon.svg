@@ -1,0 +1,28 @@
+<!-- Simple SVG favicon representing the Q shield logo -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3A50D9" />
+      <stop offset="100%" stop-color="#2C2F8F" />
+    </linearGradient>
+  </defs>
+  <!-- Shield shape -->
+  <path d="M50 10 L20 25 L20 65 Q20 75 30 80 L50 90 L70 80 Q80 75 80 65 L80 25 Z" fill="url(#gradient)" />
+  <!-- Stylized Q -->
+  <g fill="white">
+    <circle cx="35" cy="35" r="2" />
+    <circle cx="45" cy="30" r="2" />
+    <circle cx="55" cy="30" r="2" />
+    <circle cx="65" cy="35" r="2" />
+    <circle cx="70" cy="45" r="2" />
+    <circle cx="70" cy="55" r="2" />
+    <circle cx="65" cy="65" r="2" />
+    <circle cx="55" cy="70" r="2" />
+    <circle cx="45" cy="70" r="2" />
+    <circle cx="35" cy="65" r="2" />
+    <circle cx="30" cy="55" r="2" />
+    <circle cx="30" cy="45" r="2" />
+    <circle cx="60" cy="60" r="2" />
+    <circle cx="68" cy="68" r="2" />
+  </g>
+</svg>
