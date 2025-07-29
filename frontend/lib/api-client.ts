@@ -28,20 +28,14 @@ const getApiUrl = () => {
   return process.env.NEXT_PUBLIC_API_URL || 'https://platform-e2e.onrender.com'
 }
 
-// Get authentication token from Supabase
+// Get authentication token from AWS Cognito
 const getAuthToken = async () => {
   if (typeof window === 'undefined') return null
   
   try {
-    // Import Supabase client dynamically to avoid SSR issues
-    const { createClient } = await import('@supabase/supabase-js')
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    
-    const { data: { session } } = await supabase.auth.getSession()
-    return session?.access_token || null
+    // For now, return null until Cognito is fully implemented
+    // TODO: Implement Cognito token retrieval
+    return null
   } catch (error) {
     console.error('Error getting auth token:', error)
     return null
