@@ -35,10 +35,13 @@ function createEnvironmentConfig(): EnvironmentConfig {
     .filter(([_, value]) => !value || value.trim() === '')
     .map(([key]) => key)
 
-  // Allow dummy values during build process, only validate in runtime
+  // Allow build to proceed with environment variables even if .env files are missing
   const isDummyValues = required.cognitoUserPoolId === 'dummy-pool-id' || required.cognitoClientId === 'dummy-client-id'
+  const hasValidValues = required.cognitoUserPoolId && required.cognitoClientId && 
+                         required.cognitoUserPoolId.includes('us-east-1_') && 
+                         required.cognitoClientId.length > 10
   
-  if (missing.length > 0 && !isDummyValues && typeof window !== 'undefined') {
+  if (missing.length > 0 && !isDummyValues && !hasValidValues && typeof window !== 'undefined') {
     console.warn(
       `⚠️ Missing required environment variables:\n` +
       missing.map(key => `   • NEXT_PUBLIC_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`).join('\n')
