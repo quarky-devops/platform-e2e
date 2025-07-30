@@ -58,6 +58,38 @@ pipelines:
             - cd ../go_backend
             - export PATH=$PATH:/usr/local/go/bin
             - go build -o quarkfin-backend .
+            # Deploy applications to EC2
+            - echo "Deploying applications to EC2..."
+            - export INSTANCE_ID=$(aws cloudformation describe-stacks --stack-name QuarkfinAppStack --query 'Stacks[0].Outputs[?OutputKey==`AppInstanceId`].OutputValue' --output text)
+            - echo "Instance ID: $INSTANCE_ID"
+            # Create deployment package
+            - cd ..
+            - mkdir deployment-package
+            - cp -r frontend/.next deployment-package/
+            - cp -r frontend/public deployment-package/
+            - cp frontend/package.json deployment-package/
+            - cp go_backend/quarkfin-backend deployment-package/
+            # Create S3 bucket for deployment
+            - export DEPLOY_BUCKET="quarkfin-deploy-$(date +%s)"
+            - aws s3 mb s3://$DEPLOY_BUCKET --region $AWS_DEFAULT_REGION
+            - tar -czf deployment.tar.gz -C deployment-package .
+            - aws s3 cp deployment.tar.gz s3://$DEPLOY_BUCKET/
+            # Deploy to EC2 via SSM
+            - |
+              aws ssm send-command \
+                --instance-ids $INSTANCE_ID \
+                --document-name "AWS-RunShellScript" \
+                --parameters 'commands=[
+                  "sudo -u ec2-user bash -c '\''cd /opt/quarkfin && aws s3 cp s3/'$DEPLOY_BUCKET'/deployment.tar.gz . --region '$AWS_DEFAULT_REGION' && tar -xzf deployment.tar.gz'\''"',
+                  "sudo -u ec2-user bash -c '\''cd /opt/quarkfin && pm2 stop all || true && pm2 delete all || true'\''"',
+                  "sudo -u ec2-user bash -c '\''cd /opt/quarkfin && npm install --production'\''"',
+                  "sudo -u ec2-user bash -c '\''cd /opt/quarkfin && pm2 start npm --name quarkfin-frontend -- start -- -p 3001'\''"',
+                  "sudo -u ec2-user bash -c '\''cd /opt/quarkfin && PORT=8081 pm2 start ./quarkfin-backend --name quarkfin-backend'\''"',
+                  "sudo -u ec2-user bash -c '\''pm2 status'\''"'
+                ] \
+                --output text \
+                --query 'Command.CommandId'
+            - echo "Applications deployed to EC2!"
             - echo "Deployment completed successfully!"
             - echo "Frontend URL - https://$CDN_DOMAIN"
             - echo "API URL - https://$CDN_DOMAIN/api"
