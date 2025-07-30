@@ -79,21 +79,56 @@ pipelines:
             - tar -czf deployment.tar.gz -C deployment-package .
             - aws s3 cp deployment.tar.gz s3://$DEPLOY_BUCKET/
             # Deploy to EC2 via SSM - Create deployment script
-            - echo '#!/bin/bash' > deploy-ec2.sh
-            - echo 'cd /opt/quarkfin' >> deploy-ec2.sh
-            - echo 'aws s3 cp s3/'"$DEPLOY_BUCKET"'/deployment.tar.gz . --region '"$AWS_DEFAULT_REGION" >> deploy-ec2.sh
-            - echo 'tar -xzf deployment.tar.gz' >> deploy-ec2.sh
-            - echo 'pm2 stop all || true' >> deploy-ec2.sh
-            - echo 'pm2 delete all || true' >> deploy-ec2.sh
-            - echo 'npm install --production' >> deploy-ec2.sh
-            - echo 'pm2 start npm --name quarkfin-frontend -- start -- -p 3001' >> deploy-ec2.sh
-            - echo 'PORT=8081 pm2 start ./quarkfin-backend --name quarkfin-backend' >> deploy-ec2.sh
-            - echo 'pm2 status' >> deploy-ec2.sh
+            - |
+              cat > deploy-ec2.sh << EOF
+              #!/bin/bash
+              set -e
+              echo "Starting EC2 deployment..."
+              cd /opt/quarkfin
+              
+              # Download deployment package
+              aws s3 cp s3://$DEPLOY_BUCKET/deployment.tar.gz . --region $AWS_DEFAULT_REGION
+              
+              # Extract deployment
+              tar -xzf deployment.tar.gz
+              
+              # Stop existing services
+              pm2 stop all || true
+              pm2 delete all || true
+              
+              # Install dependencies
+              npm install --production --silent
+              
+              # Start services
+              export NODE_ENV=production
+              export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID
+              export NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID
+              export NEXT_PUBLIC_AWS_REGION=$AWS_DEFAULT_REGION
+              
+              pm2 start npm --name quarkfin-frontend -- start -- -p 3001
+              PORT=8081 pm2 start ./quarkfin-backend --name quarkfin-backend
+              
+              # Show status
+              pm2 status
+              echo "Deployment completed successfully!"
+              EOF
             - chmod +x deploy-ec2.sh
             # Upload script to S3
             - aws s3 cp deploy-ec2.sh s3://$DEPLOY_BUCKET/
             # Execute script on EC2
-            - aws ssm send-command --instance-ids "$INSTANCE_ID" --document-name "AWS-RunShellScript" --parameters 'commands=["sudo -u ec2-user aws s3 cp s3/'"$DEPLOY_BUCKET"'/deploy-ec2.sh /tmp/","sudo -u ec2-user chmod +x /tmp/deploy-ec2.sh","sudo -u ec2-user /tmp/deploy-ec2.sh"]' --output text --query 'Command.CommandId'
+            - |
+              COMMAND_ID=$(aws ssm send-command \
+                --instance-ids "$INSTANCE_ID" \
+                --document-name "AWS-RunShellScript" \
+                --parameters 'commands=[
+                  "sudo chown -R ec2-user:ec2-user /opt/quarkfin",
+                  "sudo -u ec2-user aws s3 cp s3/'$DEPLOY_BUCKET'/deploy-ec2.sh /tmp/ --region '$AWS_DEFAULT_REGION'",
+                  "sudo -u ec2-user chmod +x /tmp/deploy-ec2.sh",
+                  "sudo -u ec2-user /tmp/deploy-ec2.sh"
+                ]' \
+                --output text \
+                --query 'Command.CommandId')
+              echo "Deployment command sent. Command ID: $COMMAND_ID"
             - echo "Deployment script sent to EC2"
             - echo "Applications deployed to EC2!"
             - echo "Deployment completed successfully!"
