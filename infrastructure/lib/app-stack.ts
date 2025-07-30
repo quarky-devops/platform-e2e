@@ -40,6 +40,20 @@ export class QuarkfinAppStack extends cdk.Stack {
     // Allow instance to read database secrets
     props.database.secret?.grantRead(instanceRole);
 
+    // Add S3 permissions for deployment package access
+    instanceRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        's3:GetObject',
+        's3:GetObjectVersion',
+        's3:ListBucket'
+      ],
+      resources: [
+        'arn:aws:s3:::quarkfin-deploy-*',
+        'arn:aws:s3:::quarkfin-deploy-*/*'
+      ]
+    }));
+
     // Key pair for SSH access (create manually or use existing)
     // For now, we'll reference it by name - you can create it in AWS console
     const keyName = 'quarkfin-production-key';
