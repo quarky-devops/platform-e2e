@@ -122,7 +122,7 @@ pipelines:
                 --document-name "AWS-RunShellScript" \
                 --parameters 'commands=[
                   "sudo chown -R ec2-user:ec2-user /opt/quarkfin",
-                  "sudo -u ec2-user aws s3 cp s3/'$DEPLOY_BUCKET'/deploy-ec2.sh /tmp/ --region '$AWS_DEFAULT_REGION'",
+                  "sudo -u ec2-user aws s3 cp s3://'$DEPLOY_BUCKET'/deploy-ec2.sh /tmp/ --region '$AWS_DEFAULT_REGION'",
                   "sudo -u ec2-user chmod +x /tmp/deploy-ec2.sh",
                   "sudo -u ec2-user /tmp/deploy-ec2.sh"
                 ]' \
