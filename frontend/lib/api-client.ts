@@ -250,6 +250,95 @@ class AWSAPIClient {
     return this.retryRequest(() => this.client.post<BusinessRiskAssessment>(`/api/business-risk-prevention/assessments/${id}/rerun`))
   }
 
+  async deleteBusinessRiskAssessment(id: string): Promise<{ message: string }> {
+    return this.retryRequest(() => this.client.delete<{ message: string }>(`/api/business-risk-prevention/assessments/${id}`))
+  }
+
+  async bulkDeleteBusinessRiskAssessments(ids: string[]): Promise<{ message: string; deleted_count: number }> {
+    return this.retryRequest(() => this.client.post<{ message: string; deleted_count: number }>('/api/business-risk-prevention/assessments/bulk-delete', { ids }))
+  }
+
+  // Website Risk Assessment API (Legacy)
+  async listAssessments(params?: {
+    limit?: number
+    offset?: number
+    status?: 'pending' | 'processing' | 'completed' | 'failed'
+    country_code?: string
+    risk_category?: 'low_risk' | 'med_risk' | 'high_risk'
+  }): Promise<Assessment[]> {
+    const queryParams = new URLSearchParams()
+    if (params?.limit) queryParams.append('limit', params.limit.toString())
+    if (params?.offset) queryParams.append('offset', params.offset.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.country_code) queryParams.append('country_code', params.country_code)
+    if (params?.risk_category) queryParams.append('risk_category', params.risk_category)
+    
+    const url = `/api/website-risk-assessment/assessments${queryParams.toString() ? '?' + queryParams.toString() : ''}`
+    return this.retryRequest(() => this.client.get<Assessment[]>(url))
+  }
+
+  async getAssessment(id: number): Promise<Assessment> {
+    return this.retryRequest(() => this.client.get<Assessment>(`/api/website-risk-assessment/assessments/${id}`))
+  }
+
+  async createAssessment(data: CreateAssessmentRequest): Promise<Assessment> {
+    return this.retryRequest(() => this.client.post<Assessment>('/api/website-risk-assessment/assessments', data))
+  }
+
+  async pollAssessmentStatus(id: number, onUpdate?: (assessment: Assessment) => void): Promise<Assessment> {
+    return new Promise((resolve, reject) => {
+      const pollInterval = setInterval(async () => {
+        try {
+          const assessment = await this.getAssessment(id)
+          
+          if (onUpdate) {
+            onUpdate(assessment)
+          }
+          
+          if (assessment.status === 'completed' || assessment.status === 'failed') {
+            clearInterval(pollInterval)
+            resolve(assessment)
+          }
+        } catch (error) {
+          clearInterval(pollInterval)
+          reject(error)
+        }
+      }, 2000) // Poll every 2 seconds
+    })
+  }
+
+  async exportBusinessRiskAssessmentsCSV(ids?: string[]): Promise<Blob> {
+    const payload = ids ? { ids } : {}
+    const response = await this.client.post('/api/business-risk-prevention/assessments/export/csv', payload, {
+      responseType: 'blob'
+    })
+    return response.data
+  }
+
+  async createWebsiteRiskAssessment(data: WebsiteRiskAssessmentRequest): Promise<WebsiteRiskAssessmentResponse> {
+    return this.retryRequest(() => this.client.post<WebsiteRiskAssessmentResponse>('/api/website-risk-assessment/do-assessment', data))
+  }
+
+  async getWebsiteRiskAssessment(data: { website: string }): Promise<any> {
+    return this.retryRequest(() => this.client.post('/api/website-risk-assessment/get-assessment', data))
+  }
+
+  // Export functionality
+  async exportBusinessRiskAssessmentPDF(id: string): Promise<Blob> {
+    const response = await this.client.get(`/api/business-risk-prevention/assessments/${id}/export/pdf`, {
+      responseType: 'blob'
+    })
+    return response.data
+  }
+
+  async exportBusinessRiskAssessmentCSV(ids?: string[]): Promise<Blob> {
+    const payload = ids ? { ids } : {}
+    const response = await this.client.post('/api/business-risk-prevention/assessments/export/csv', payload, {
+      responseType: 'blob'
+    })
+    return response.data
+  }
+
   async getBusinessRiskInsights(): Promise<BusinessRiskInsights> {
     return this.retryRequest(() => this.client.get<BusinessRiskInsights>('/api/business-risk-prevention/insights'))
   }

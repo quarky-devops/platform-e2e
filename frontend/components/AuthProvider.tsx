@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { auth, cognitoConfig } from '../lib/supabase'
+import { config, isDevelopmentMode } from '../lib/config'
 import type { UserProfile, SubscriptionPlan, UserCredits } from '../lib/types'
 
 // AWS Cognito Types
@@ -46,10 +47,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Get API URL for backend communication
   const getApiUrl = () => {
-    if (process.env.NODE_ENV === 'development') {
-      return 'http://localhost:8080'
-    }
-    return '/api'
+    return config.api.baseUrl === '/api' && process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8080'
+      : config.api.baseUrl
   }
 
   // Fetch user profile from AWS backend
@@ -115,9 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Initialize AWS Cognito session
     const initializeAuth = async () => {
       try {
-        // Check if Cognito is configured
-        if (!cognitoConfig.userPoolId || !cognitoConfig.userPoolWebClientId) {
-          console.warn('⚠️ AWS Cognito not configured. Using development mode.')
+        // Check if Cognito is configured for production
+        if (isDevelopmentMode) {
+          console.warn('⚠️ AWS Cognito not configured. Running in development mode.')
           setLoading(false)
           return
         }
@@ -142,7 +142,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setLoading(true)
     try {
-      const result = await auth.signIn(email, password)
+      const result = await auth.signIn(email, password) as { 
+        user: User
+        session: Session 
+      }
       
       if (result.session) {
         setSession(result.session)
@@ -165,7 +168,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await auth.signUp(email, password, {
         full_name: fullName,
         phone: phone
-      })
+      }) as {
+        user: User | null
+        session: Session | null
+      }
       
       // AWS Cognito signup requires email confirmation
       console.log('✅ AWS: Signup successful, email confirmation required')
@@ -181,7 +187,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     setLoading(true)
     try {
-      const result = await auth.signInWithGoogle()
+      const result = await auth.signInWithGoogle() as {
+        url: string
+      }
       return result
     } catch (error) {
       console.error('AWS: Google sign in error:', error)
