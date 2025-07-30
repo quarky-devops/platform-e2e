@@ -75,21 +75,15 @@ pipelines:
             - tar -czf deployment.tar.gz -C deployment-package .
             - aws s3 cp deployment.tar.gz s3://$DEPLOY_BUCKET/
             # Deploy to EC2 via SSM
+            - echo "Deploying to EC2 instance $INSTANCE_ID..."
             - |
-              COMMAND_ID=$(aws ssm send-command \
+              aws ssm send-command \
                 --instance-ids $INSTANCE_ID \
                 --document-name "AWS-RunShellScript" \
-                --parameters 'commands=[
-                  "sudo -u ec2-user bash -c \"cd /opt/quarkfin && aws s3 cp s3/'$DEPLOY_BUCKET'/deployment.tar.gz . --region '$AWS_DEFAULT_REGION' && tar -xzf deployment.tar.gz\"",
-                  "sudo -u ec2-user bash -c \"cd /opt/quarkfin && pm2 stop all || true && pm2 delete all || true\"",
-                  "sudo -u ec2-user bash -c \"cd /opt/quarkfin && npm install --production\"",
-                  "sudo -u ec2-user bash -c \"cd /opt/quarkfin && pm2 start npm --name quarkfin-frontend -- start -- -p 3001\"",
-                  "sudo -u ec2-user bash -c \"cd /opt/quarkfin && PORT=8081 pm2 start ./quarkfin-backend --name quarkfin-backend\"",
-                  "sudo -u ec2-user bash -c \"pm2 status\""
-                ]' \
+                --parameters 'commands=["cd /opt/quarkfin && sudo -u ec2-user aws s3 cp s3/'$DEPLOY_BUCKET'/deployment.tar.gz . --region '$AWS_DEFAULT_REGION'","cd /opt/quarkfin && sudo -u ec2-user tar -xzf deployment.tar.gz","cd /opt/quarkfin && sudo -u ec2-user pm2 stop all || true","cd /opt/quarkfin && sudo -u ec2-user pm2 delete all || true","cd /opt/quarkfin && sudo -u ec2-user npm install --production","cd /opt/quarkfin && sudo -u ec2-user pm2 start npm --name quarkfin-frontend -- start -- -p 3001","cd /opt/quarkfin && sudo -u ec2-user PORT=8081 pm2 start ./quarkfin-backend --name quarkfin-backend","sudo -u ec2-user pm2 status"]' \
                 --output text \
-                --query 'Command.CommandId')
-            - echo "EC2 Deployment Command ID: $COMMAND_ID"
+                --query 'Command.CommandId' > /tmp/command_id.txt
+            - echo "EC2 deployment command sent. Command ID: $(cat /tmp/command_id.txt)"
             - echo "Applications deployed to EC2!"
             - echo "Deployment completed successfully!"
             - echo "Frontend URL - https://$CDN_DOMAIN"
