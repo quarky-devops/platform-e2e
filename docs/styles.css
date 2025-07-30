@@ -1,0 +1,271 @@
+/* QuarkFin Technical Architecture PDF Styles */
+
+/* Document body */
+body {
+    font-family: 'Arial', sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #333;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Headers */
+h1 {
+    color: #2c3e50;
+    font-size: 24pt;
+    font-weight: bold;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    page-break-after: avoid;
+}
+
+h2 {
+    color: #34495e;
+    font-size: 18pt;
+    font-weight: bold;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 8px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    page-break-after: avoid;
+}
+
+h3 {
+    color: #2c3e50;
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+}
+
+h4 {
+    color: #34495e;
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+}
+
+/* Paragraphs */
+p {
+    margin-bottom: 12px;
+    text-align: justify;
+}
+
+/* Code blocks */
+pre {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    overflow-x: auto;
+    margin: 15px 0;
+    page-break-inside: avoid;
+}
+
+code {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 15px 0;
+    page-break-inside: avoid;
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #2980b9;
+}
+
+td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Lists */
+ul, ol {
+    margin: 10px 0;
+    padding-left: 25px;
+}
+
+li {
+    margin-bottom: 5px;
+}
+
+/* Blockquotes */
+blockquote {
+    border-left: 4px solid #3498db;
+    margin: 15px 0;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    font-style: italic;
+}
+
+/* Links */
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Horizontal rules */
+hr {
+    border: none;
+    border-top: 2px solid #ecf0f1;
+    margin: 30px 0;
+}
+
+/* Architecture diagrams */
+.architecture-diagram {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 9pt;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+/* Page breaks */
+.page-break {
+    page-break-before: always;
+}
+
+/* Table of contents */
+#TOC {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+#TOC ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#TOC li {
+    margin-bottom: 5px;
+}
+
+#TOC a {
+    color: #2c3e50;
+    text-decoration: none;
+}
+
+/* Executive summary box */
+.executive-summary {
+    background-color: #e8f4fd;
+    border: 2px solid #3498db;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.executive-summary h2 {
+    color: #2980b9;
+    border-bottom: none;
+    margin-top: 0;
+}
+
+/* Technology stack table */
+.tech-stack-table th {
+    background-color: #2c3e50;
+}
+
+/* Security measures */
+.security-measures {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+/* Troubleshooting sections */
+.troubleshooting {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.troubleshooting h3 {
+    color: #721c24;
+}
+
+/* Future enhancements */
+.future-enhancements {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.future-enhancements h3 {
+    color: #0c5460;
+}
+
+/* Footer */
+.footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px solid #ecf0f1;
+    text-align: center;
+    font-size: 10pt;
+    color: #7f8c8d;
+}
+
+/* Print-specific styles */
+@media print {
+    body {
+        margin: 0;
+        padding: 15px;
+    }
+    
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
+    }
+    
+    pre, table {
+        page-break-inside: avoid;
+    }
+    
+    .page-break {
+        page-break-before: always;
+    }
+} 

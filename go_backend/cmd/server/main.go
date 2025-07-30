@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"bitbucket.org/quarkfin/platform-e2e/go_backend/api"
 	"bitbucket.org/quarkfin/platform-e2e/go_backend/internal/auth"
@@ -68,7 +67,7 @@ func main() {
 		} else {
 			log.Printf("✅ Business risk assessment database initialized")
 		}
-	
+
 		// Log production database connections
 		if cfg.IsProduction() {
 			log.Printf("✅ PostgreSQL: %s", cfg.PostgresConnectionString())
