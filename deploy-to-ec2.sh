@@ -1,71 +1,52 @@
 #!/bin/bash
 
-# Deploy Application Code to EC2 - Fix 503 Error
+echo "🚀 Deploying QuarkfinAI to EC2 Instance"
+echo "======================================"
 
-echo "🚀 Deploying Application Code to Fix 503 Error"
-echo "=============================================="
-
-# Get EC2 instance ID
-INSTANCE_ID=$(aws cloudformation describe-stacks --stack-name QuarkfinAppStack --query 'Stacks[0].Outputs[?OutputKey==`AppInstanceId`].OutputValue' --output text)
-echo "🖥️ EC2 Instance: $INSTANCE_ID"
-
-# Build applications locally first
-echo ""
-echo "📦 Building applications..."
-cd /Users/bidya/Documents/quarkfin/platform-e2e
-
-# Build frontend
-echo "🎨 Building frontend..."
-cd frontend
-npm install
-npm run build
-cd ..
-
-# Build backend
-echo "⚙️ Building backend..."
-cd go_backend
-go build -o quarkfin-backend .
-cd ..
+INSTANCE_ID="i-0e123a3106f19af14"
 
 # Create deployment package
 echo "📦 Creating deployment package..."
-tar -czf app-deployment.tar.gz frontend/.next go_backend/quarkfin-backend
+tar -czf deployment.tar.gz \
+  --exclude='node_modules' \
+  --exclude='.next' \
+  --exclude='*.log' \
+  --exclude='.git' \
+  frontend/ go_backend/
 
-# Upload to S3
-echo "☁️ Uploading to S3..."
-BUCKET_NAME="quarkfin-deployment-$(date +%s)"
-aws s3 mb s3://$BUCKET_NAME
-aws s3 cp app-deployment.tar.gz s3://$BUCKET_NAME/
+# Copy to S3 for easy transfer
+aws s3 cp deployment.tar.gz s3://quarkfin-deployment-bucket-temp/
 
-# Deploy to EC2
+echo "📋 Deployment commands for EC2:"
+echo "================================"
+echo "1. Connect to instance:"
+echo "   aws ssm start-session --target $INSTANCE_ID"
 echo ""
-echo "🚀 Deploying to EC2..."
-aws ssm send-command \
-  --instance-ids $INSTANCE_ID \
-  --document-name "AWS-RunShellScript" \
-  --parameters "commands=[
-    'cd /home/ec2-user',
-    'aws s3 cp s3://$BUCKET_NAME/app-deployment.tar.gz .',
-    'tar -xzf app-deployment.tar.gz',
-    'sudo mkdir -p /var/www/quarkfin /opt/quarkfin',
-    'sudo cp -r frontend/.next/* /var/www/quarkfin/ 2>/dev/null || echo \"Frontend files copied\"',
-    'sudo cp go_backend/quarkfin-backend /opt/quarkfin/',
-    'sudo chmod +x /opt/quarkfin/quarkfin-backend',
-    'sudo chown -R nginx:nginx /var/www/quarkfin',
-    'echo \"Starting applications...\"',
-    'cd /opt/quarkfin && sudo nohup ./quarkfin-backend > backend.log 2>&1 &',
-    'sudo systemctl restart nginx',
-    'echo \"Deployment complete!\"',
-    'ps aux | grep quarkfin-backend',
-    'sudo systemctl status nginx'
-  ]" \
-  --output text
+echo "2. Run these commands on the instance:"
+echo "   sudo su - ec2-user"
+echo "   cd /opt/quarkfin"
+echo "   aws s3 cp s3://quarkfin-deployment-bucket-temp/deployment.tar.gz ."
+echo "   tar -xzf deployment.tar.gz"
+echo ""
+echo "3. Build and start frontend:"
+echo "   cd frontend"
+echo "   npm install"
+echo "   npm run build"
+echo "   pm2 start npm --name frontend -- start -- -p 3001"
+echo ""
+echo "4. Build and start backend:"
+echo "   cd ../go_backend"
+echo "   export PATH=\$PATH:/usr/local/go/bin"
+echo "   go build -o quarkfin-backend ."
+echo "   pm2 start ./quarkfin-backend --name backend"
+echo ""
+echo "5. Check if services are running:"
+echo "   pm2 status"
+echo "   curl localhost:3001/health"
+echo "   curl localhost:8081/health"
+
+# Clean up
+rm deployment.tar.gz
 
 echo ""
-echo "✅ Deployment command sent!"
-echo ""
-echo "🔍 Wait 2-3 minutes, then test:"
-echo "   Frontend: https://d1o1sajvcnqzmr.cloudfront.net"
-echo "   API: https://d1o1sajvcnqzmr.cloudfront.net/api"
-echo ""
-echo "🎯 If still 503, run diagnose-503.sh to check status"
+echo "🎯 After deployment, test the load balancer again!"
